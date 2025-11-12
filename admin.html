@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizHub - Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .hidden {
+            display: none;
+        }
+        .admin-page {
+            display: none;
+        }
+        .admin-page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-width: 1px;
+            border-color: #e5e7eb;
+        }
+
+        .btn {
+            display: inline-block;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition-property: all;
+            transition-duration: 150ms;
+        }
+        .btn:hover {
+             transform: scale(1.05);
+        }
+        .btn:disabled {
+            background-color: #9ca3af;
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+         .btn:disabled:hover {
+             transform: scale(1);
+         }
+        .btn-primary {
+            background-color: #6366f1;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #818cf8;
+        }
+        .btn-secondary {
+            background-color: #374151;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            background-color: white;
+            border-width: 1px;
+            border-color: #e5e7eb;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            color: #4b5563;
+            transition-property: color, background-color;
+            transition-duration: 150ms;
+        }
+        .sidebar-link:hover {
+            background-color: #f3f4f6;
+            color: #4f46e5;
+        }
+        .sidebar-link.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .sidebar-link.active:hover {
+            background-color: #4f46e5;
+            color: white;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-width: 1px;
+            border-color: #e5e7eb;
+        }
+        
+        .input-dark {
+            width: 100%;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            margin-top: 0.25rem;
+            background-color: white;
+            border-width: 1px;
+            border-color: #d1d5db;
+            color: #111827;
+            border-radius: 0.5rem;
+            outline: none;
+        }
+         .input-dark:focus {
+             border-color: #6366f1;
+             box-shadow: 0 0 0 1px #6366f1;
+         }
+        
+        .select-dark {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.25rem;
+            background-color: white;
+            border-width: 1px;
+            border-color: #d1d5db;
+            color: #111827;
+            border-radius: 0.5rem;
+            outline: none;
+        }
+        .select-dark:focus {
+             border-color: #6366f1;
+             box-shadow: 0 0 0 1px #6366f1;
+         }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #4f46e5;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-800 bg-gray-100">
+
+    <section id="page-login" class="flex items-center justify-center min-h-screen">
+        <div class="card w-full max-w-md p-8 space-y-6">
+            <h1 class="text-3xl font-bold text-center text-indigo-600">QuizHub Admin Portal</h1>
+            <form class="space-y-6" action="#">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username:</label>
+                    <input type="text" id="username" name="username" class="input-dark" value="admin">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
+                    <input type="password" id="password" name="password" class="input-dark" value="password">
+                </div>
+                <p id="login-error" class="text-red-500 text-sm h-4 text-center"></p>
+                <div class="flex items-center justify-between">
+                    <a href="#" class="text-sm font-medium text-indigo-600 hover:underline">Forgot Password?</a>
+                </div>
+                <button type="button" id="login-btn" class="btn btn-primary w-full text-lg py-3">
+                    Login
+                </button>
+            </form>
+            <p class="text-sm text-center text-gray-500">© 2025 QuizHub Admin Panel</p>
+        </div>
+    </section>
+
+    <section id="admin-panel" class="hidden">
+        <div class="flex h-screen">
+            <aside id="admin-sidebar" class="w-64 card p-0 fixed md:relative h-screen overflow-y-auto transition-transform transform -translate-x-full md:translate-x-0 z-30">
+                <div class="p-6">
+                    <h1 class="text-3xl font-bold text-indigo-600">QuizHub</h1>
+                </div>
+                <nav class="mt-6 p-4 space-y-2">
+                    <a href="#" class="sidebar-link active" data-target="page-dashboard">
+                        <svg class="mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                        Dashboard
+                    </a>
+                    <a href="#" class="sidebar-link" data-target="page-manage-quizzes">
+                        <svg class="mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.512 1.414l-7.114 8.298a.75.75 0 01-1.06 0l-1.06-1.06a.75.75 0 010-1.06l7.114-8.298A2.25 2.25 0 019.75 3.104z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 3.104v5.714a2.25 2.25 0 00.512 1.414l7.114 8.298a.75.75 0 001.06 0l1.06-1.06a.75.75 0 000-1.06l-7.114-8.298A2.25 2.25 0 0015.75 3.104z" /></svg>
+                        Manage Quizzes
+                    </a>
+                    <a href="#" class="sidebar-link" data-target="page-manage-users">
+                        <svg class="mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                        Manage Users
+                    </a>
+                    <a href="#" class="sidebar-link" data-target="page-results">
+                        <svg class="mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625C9.75 8.004 10.254 7.5 10.875 7.5h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" /></svg>
+                        View Results
+                    </a>
+                    <a href="#" class="sidebar-link">
+                        <svg class="mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-1.007 1.11-1.226a2.25 2.25 0 012.583 1.116L14.5 4.5l1.106 1.66a2.25 2.25 0 01-1.11 2.583 2.25 2.25 0 01-2.583-1.116L12 6.101l-1.106-1.66A2.25 2.25 0 019.594 3.94zM12 9.75a2.25 2.25 0 012.25 2.25v.001a2.25 2.25 0 01-4.5 0v-.001A2.25 2.25 0 0112 9.75z" /><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 15.75a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0v-2.25a.75.75 0 01.75-.75z" /><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v.001M3.75 9v.001M3.75 15v.001M3.75 21v.001M9.75 3v.001M9.75 9v.001M9.75 15v.001M9.75 21v.001M15.75 3v.001M15.75 9v.001M15.75 15v.001M15.75 21v.001M21.75 3v.001M21.75 9v.001M21.75 15v.001M21.75 21v.001" /></svg>
+                        Settings
+                    </a>
+                </nav>
+                <div class="absolute bottom-0 p-4 w-full">
+                    <button id="logout-btn" class="sidebar-link w-full">
+                        <svg class="mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+                        Logout
+                    </button>
+                </div>
+            </aside>
+
+            <main id="admin-content" class="flex-1 p-4 md:p-8 overflow-auto h-screen md:ml-64">
+                
+                <div class="md:hidden flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold text-indigo-600">QuizHub</h1>
+                    <button id="burger-btn" class="p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-gray-800"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                    </button>
+                </div>
+
+                <section id="page-dashboard" class="admin-page active">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-8">Dashboard</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="stat-card">
+                            <h3 class="text-lg font-medium text-gray-600">Total Quizzes</h3>
+                            <p class="text-4xl font-bold text-indigo-600">340</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 class="text-lg font-medium text-gray-600">Attempts Today</h3>
+                            <p class="text-4xl font-bold text-indigo-600">890</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 class="text-lg font-medium text-gray-600">Average Score</h3>
+                            <p class="text-4xl font-bold text-indigo-600">7.8/10</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 class="text-lg font-medium text-gray-600">Top Scoring User</h3>
+                            <p class="text-4xl font-bold text-indigo-600">@JaneDoe</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-900">Recent Activity Table</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold text-gray-700">User</th>
+                                        <th class="p-3 font-semibold text-gray-700">Quiz Title</th>
+                                        <th class="p-3 font-semibold text-gray-700">Score</th>
+                                        <th class="p-3 font-semibold text-gray-700">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="p-3">@JohnDoe</td>
+                                        <td class="p-3">GK Challenge</td>
+                                        <td class="p-3">8/10</td>
+                                        <td class="p-3">Nov 2, 2025</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="p-3">@JaneDoe</td>
+                                        <td class="p-3">Science Facts</td>
+                                        <td class="p-3">9/10</td>
+                                        <td class="p-3">Nov 1, 2025</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-manage-quizzes" class="admin-page">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-8">Manage Quizzes</h2>
+                    
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <div class="relative w-full md:w-1/2">
+                            <input type="text" placeholder="Search by title or category..." class="input-dark pl-10 p-3">
+                            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                        </div>
+                        <button id="create-quiz-btn" class="btn btn-primary w-full md:w-auto px-5 py-3">
+                            + Create New Quiz
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold text-gray-700">Quiz Title</th>
+                                        <th class="p-3 font-semibold text-gray-700">Category</th>
+                                        <th class="p-3 font-semibold text-gray-700">Questions</th>
+                                        <th class="p-3 font-semibold text-gray-700">Difficulty</th>
+                                        <th class="p-3 font-semibold text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="p-3">Science Facts</td>
+                                        <td class="p-3">Science</td>
+                                        <td class="p-3">10</td>
+                                        <td class="p-3"><span class="px-2 py-1 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-full">Medium</span></td>
+                                        <td class="p-3">
+                                            <button class="text-indigo-600 hover:underline font-medium edit-quiz-btn">Edit</button>
+                                            <button class="text-red-600 hover:underline font-medium ml-4">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="p-3">World Geography</td>
+                                        <td class="p-3">General</td>
+                                        <td class="p-3">15</td>
+                                        <td class="p-3"><span class="px-2 py-1 text-sm font-medium text-red-800 bg-red-100 rounded-full">Hard</span></td>
+                                        <td class="p-3">
+                                            <button class="text-indigo-600 hover:underline font-medium edit-quiz-btn">Edit</button>
+                                            <button class="text-red-600 hover:underline font-medium ml-4">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-manage-users" class="admin-page">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-8">Manage Users</h2>
+                    
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <input type="text" placeholder="Search by username or email" class="input-dark w-full md:w-1/2">
+                        <select class="select-dark w-full md:w-auto">
+                            <option>Filter by active/inactive users</option>
+                            <option>Active</option>
+                            <option>Inactive</option>
+                        </select>
+                    </div>
+
+                    <div class="card">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold text-gray-700">Username</th>
+                                        <th class="p-3 font-semibold text-gray-700">Email</th>
+                                        <th class="p-3 font-semibold text-gray-700">Quizzes Taken</th>
+                                        <th class="p-3 font-semibold text-gray-700">Role</th>
+                                        <th class="p-3 font-semibold text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="p-3">@JaneDoe</td>
+                                        <td class="p-3">jane@email.com</td>
+                                        <td class="p-3">25</td>
+                                        <td class="p-3">User</td>
+                                        <td class="p-3">
+                                            <button class="text-indigo-600 hover:underline font-medium view-user-btn">View</button>
+                                            <button class="text-red-600 hover:underline font-medium ml-4">Ban</button>
+                                        </td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="p-3">@QuizMaster</td>
+                                        <td class="p-3">master@quiz.com</td>
+                                        <td class="p-3">40</td>
+                                        <td class="p-3">Admin</td>
+                                        <td class="p-3">
+                                            <button class="text-indigo-600 hover:underline font-medium view-user-btn">View</button>
+                                            <button class="text-indigo-600 hover:underline font-medium ml-4">Edit</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="page-results" class="admin-page">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-8">Results & Analytics</h2>
+                    
+                    <div class="card mb-8 flex flex-wrap gap-4 items-center">
+                        <h3 class="text-lg font-semibold text-gray-900">Filter Section:</h3>
+                        <input type="date" class="input-dark p-2">
+                        <input type="text" placeholder="Filter by quiz name" class="input-dark p-2">
+                        <select class="select-dark p-2">
+                            <option>Category</option>
+                            <option>Science</option>
+                            <option>Sports</option>
+                        </select>
+                    </div>
+
+                    <div id="ai-summary-card" class="card mb-8 hidden">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-900">✨ AI Summary</h3>
+                        <div id="ai-summary-loading" class="flex justify-center items-center h-24">
+                            <div class="spinner"></div>
+                        </div>
+                        <p id="ai-summary-text" class="text-gray-700"></p>
+                    </div>
+
+                    <div class="card mb-8">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-900">Results Table</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="p-3 font-semibold text-gray-700">User</th>
+                                        <th class="p-3 font-semibold text-gray-700">Quiz Title</th>
+                                        <th class="p-3 font-semibold text-gray-700">Score</th>
+                                        <th class="p-3 font-semibold text-gray-700">Date</th>
+                                        <th class="p-3 font-semibold text-gray-700">Time Taken</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="p-3">@JohnDoe</td>
+                                        <td class="p-3">Tech Trivia</td>
+                                        <td class="p-3">8/10</td>
+                                        <td class="p-3">Nov 2, 2025</td>
+                                        <td class="p-3">3m 45s</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-200">
+                                        <td class="p-3">@JaneDoe</td>
+                                        <td class="p-3">Science Facts</td>
+                                        <td class="p-3">10/10</td>
+                                        <td class="p-3">Nov 1, 2025</td>
+                                        <td class="p-3">4m 10s</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-900">Analytics Section</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-center mb-2 text-gray-800">Average Scores by Category</h4>
+                                <div class="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <p class="text-gray-500">[Bar Chart Placeholder]</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-center mb-2 text-gray-800">User Performance Distribution</h4>
+                                <div class="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <p class="text-gray-500">[Pie Chart Placeholder]</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right mt-6">
+                            <button class="btn btn-secondary border border-gray-300 text-gray-700 hover:bg-gray-100">Export as PDF</button>
+                            <button id="ai-summary-btn" class="btn btn-primary ml-4">✨ Get AI Summary</button>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </section>
+
+
+    <div id="quiz-modal" class="hidden">
+        <div class="modal-backdrop modal-close"></div>
+        <div class="modal-content w-full max-w-lg p-8">
+            <h2 id="quiz-modal-title" class="text-2xl font-bold text-gray-900 mb-6">Create New Quiz</h2>
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Quiz Title:</label>
+                    <input type="text" id="quiz-title" class="input-dark">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Category:</label>
+                    <select id="quiz-category" class="select-dark">
+                        <option>Science</option>
+                        <option>Sports</option>
+                        <option>General</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Difficulty:</label>
+                    <select id="quiz-difficulty" class="select-dark">
+                        <option>Easy</option>
+                        <option>Medium</option>
+                        <option>Hard</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Add Questions:</label>
+                    <button type="button" class="text-indigo-600 hover:underline mt-2">+ Add Question</button>
+                </div>
+                <p id="quiz-error" class="text-red-500 text-sm h-4"></p>
+                <div class="flex justify-between gap-4 pt-6">
+                    <button type="button" id="ai-inspiration-btn" class="btn btn-secondary border border-indigo-500 text-indigo-600 hover:bg-indigo-50">✨ Get AI Inspiration</button>
+                    <div class="flex justify-end gap-4">
+                        <button type="button" class="modal-close btn btn-secondary">Cancel</button>
+                        <button type="button" id="save-quiz-btn" class="btn btn-primary">Save Quiz</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="user-modal" class="hidden">
+        <div class="modal-backdrop modal-close"></div>
+        <div class="modal-content w-full max-w-md p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">User Detail Modal</h2>
+            <div class="space-y-3 text-gray-700">
+                <p><strong>Username:</strong> @JaneDoe</p>
+                <p><strong>Email:</strong> jane@email.com</p>
+                <p><strong>Role:</strong> User</p>
+                <p><strong>Last Login:</strong> Nov 2, 2025</p>
+                <p><strong>User's Performance:</strong> 85% average score</p>
+                <p><strong>Quizzes Taken:</strong> 25</p>
+            </div>
+            <div class="flex justify-end pt-6">
+                <button type="button" class="modal-close btn btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ai-quiz-gen-modal" class="hidden">
+        <div class="modal-backdrop ai-modal-close"></div>
+        <div class="modal-content w-full max-w-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">✨ AI Quiz Generator</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Topic:</label>
+                    <input type="text" id="ai-topic" class="input-dark" placeholder="e.g., The Solar System">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Number of Questions:</label>
+                        <select id="ai-num-questions" class="select-dark">
+                            <option>5</option>
+                            <option>10</option>
+                            <option>15</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Difficulty:</label>
+                        <select id="ai-gen-difficulty" class="select-dark">
+                            <option>Easy</option>
+                            <option>Medium</option>
+                            <option>Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="button" id="generate-ai-quiz-btn" class="btn btn-primary w-full">Generate Questions</button>
+                
+                <div id="ai-gen-loading" class="hidden flex justify-center items-center h-24">
+                    <div class="spinner"></div>
+                </div>
+
+                <div id="ai-gen-output-container" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mt-6">Generated Questions (Copy & Paste):</label>
+                    <textarea id="ai-gen-output" rows="10" class="input-dark w-full mt-2 bg-gray-50" readonly></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end pt-6">
+                <button type="button" class="ai-modal-close btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        async function callGeminiAPI(prompt) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("API request failed");
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0]) {
+                     return result.candidates[0].content.parts[0].text;
+                } else {
+                    return "No content generated.";
+                }
+
+            } catch (error) {
+                console.error("Error calling API:", error);
+                return "Error: Could not get a response.";
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginPage = document.getElementById('page-login');
+            const adminPanel = document.getElementById('admin-panel');
+            const loginBtn = document.getElementById('login-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            const adminPages = document.querySelectorAll('.admin-page');
+            const burgerBtn = document.getElementById('burger-btn');
+            const adminSidebar = document.getElementById('admin-sidebar');
+            
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const loginError = document.getElementById('login-error');
+
+            const quizModal = document.getElementById('quiz-modal');
+            const userModal = document.getElementById('user-modal');
+            const aiQuizGenModal = document.getElementById('ai-quiz-gen-modal');
+            
+            const createQuizBtn = document.getElementById('create-quiz-btn');
+            const editQuizBtns = document.querySelectorAll('.edit-quiz-btn');
+            const viewUserBtns = document.querySelectorAll('.view-user-btn');
+            const modalCloses = document.querySelectorAll('.modal-close');
+            const aiModalCloses = document.querySelectorAll('.ai-modal-close');
+            
+            const saveQuizBtn = document.getElementById('save-quiz-btn');
+            const quizTitleInput = document.getElementById('quiz-title');
+            const quizError = document.getElementById('quiz-error');
+
+            const aiInspirationBtn = document.getElementById('ai-inspiration-btn');
+            const generateAiQuizBtn = document.getElementById('generate-ai-quiz-btn');
+            const aiGenLoading = document.getElementById('ai-gen-loading');
+            const aiGenOutputContainer = document.getElementById('ai-gen-output-container');
+            const aiGenOutput = document.getElementById('ai-gen-output');
+
+            const aiSummaryBtn = document.getElementById('ai-summary-btn');
+            const aiSummaryCard = document.getElementById('ai-summary-card');
+            const aiSummaryLoading = document.getElementById('ai-summary-loading');
+            const aiSummaryText = document.getElementById('ai-summary-text');
+
+
+            loginBtn.addEventListener('click', () => {
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+
+                if (!username || !password) {
+                    loginError.textContent = 'Username and password are required.';
+                    return;
+                }
+                
+                if (username === 'admin' && password === 'password') {
+                    loginError.textContent = '';
+                    loginPage.classList.add('hidden');
+                    adminPanel.classList.remove('hidden');
+                    showAdminPage('page-dashboard');
+                } else {
+                    loginError.textContent = 'Invalid username or password.';
+                }
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                adminPanel.classList.add('hidden');
+                loginPage.classList.remove('hidden');
+                usernameInput.value = 'admin';
+                passwordInput.value = 'password';
+            });
+            
+            burgerBtn.addEventListener('click', () => {
+                adminSidebar.classList.toggle('-translate-x-full');
+            });
+
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetPageId = link.getAttribute('data-target');
+                    
+                    if (targetPageId) {
+                        showAdminPage(targetPageId);
+                        
+                        sidebarLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                        
+                        if (window.innerWidth < 768) {
+                             adminSidebar.classList.add('-translate-x-full');
+                        }
+                    }
+                });
+            });
+
+            function showAdminPage(pageId) {
+                adminPages.forEach(page => {
+                    if (page.id === pageId) {
+                        page.classList.add('active');
+                    } else {
+                        page.classList.remove('active');
+                    }
+                });
+            }
+
+            
+            createQuizBtn.addEventListener('click', () => {
+                document.getElementById('quiz-modal-title').textContent = 'Create New Quiz';
+                quizTitleInput.value = '';
+                quizError.textContent = '';
+                quizModal.classList.remove('hidden');
+            });
+            
+            editQuizBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('quiz-modal-title').textContent = 'Edit Quiz';
+                    quizTitleInput.value = 'Existing Quiz Title';
+                    quizError.textContent = '';
+                    quizModal.classList.remove('hidden');
+                });
+            });
+
+            viewUserBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    userModal.classList.remove('hidden');
+                });
+            });
+
+            modalCloses.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    quizModal.classList.add('hidden');
+                    userModal.classList.add('hidden');
+                });
+            });
+            
+            saveQuizBtn.addEventListener('click', () => {
+                if (quizTitleInput.value.trim() === '') {
+                    quizError.textContent = 'Quiz title is required.';
+                } else {
+                    quizError.textContent = '';
+                    console.log('Quiz Saved:', { title: quizTitleInput.value });
+                    quizModal.classList.add('hidden');
+                }
+            });
+
+
+            aiInspirationBtn.addEventListener('click', () => {
+                aiQuizGenModal.classList.remove('hidden');
+                aiGenOutputContainer.classList.add('hidden');
+                aiGenOutput.value = '';
+                document.getElementById('ai-topic').value = '';
+            });
+
+            aiModalCloses.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    aiQuizGenModal.classList.add('hidden');
+                });
+            });
+
+            generateAiQuizBtn.addEventListener('click', async () => {
+                const topic = document.getElementById('ai-topic').value;
+                const numQuestions = document.getElementById('ai-num-questions').value;
+                const difficulty = document.getElementById('ai-gen-difficulty').value;
+
+                if (!topic) {
+                    alert('Please enter a topic.');
+                    return;
+                }
+
+                generateAiQuizBtn.disabled = true;
+                generateAiQuizBtn.textContent = 'Generating...';
+                aiGenLoading.classList.remove('hidden');
+                aiGenOutputContainer.classList.add('hidden');
+
+                const prompt = `Generate ${numQuestions} ${difficulty} multiple-choice questions for a quiz about "${topic}". 
+                For each question, provide:
+                1. The question text.
+                2. Four options labeled A, B, C, D.
+                3. The correct answer key (e.g., "Answer: C").
+                
+                Please format the output clearly.`;
+
+                const result = await callGeminiAPI(prompt);
+                
+                aiGenOutput.value = result;
+                aiGenLoading.classList.add('hidden');
+                aiGenOutputContainer.classList.remove('hidden');
+                generateAiQuizBtn.disabled = false;
+                generateAiQuizBtn.textContent = 'Generate Questions';
+            });
+
+            aiSummaryBtn.addEventListener('click', async () => {
+                aiSummaryBtn.disabled = true;
+                aiSummaryBtn.textContent = 'Generating...';
+                aiSummaryCard.classList.remove('hidden');
+                aiSummaryLoading.classList.remove('hidden');
+                aiSummaryText.textContent = '';
+
+                const prompt = `Please provide a brief, one-paragraph summary of the following quiz website analytics:
+                - Total Quizzes: 340
+                - Attempts Today: 890
+                - Average Score: 7.8/10
+                - Top Scoring User: @JaneDoe
+                - Recent Activity: A user scored 8/10 on 'GK Challenge', another scored 9/10 on 'Science Facts'.
+                
+                Focus on the overall health and user engagement.`;
+
+                const result = await callGeminiAPI(prompt);
+
+                aiSummaryText.textContent = result;
+                aiSummaryLoading.classList.add('hidden');
+                aiSummaryBtn.disabled = false;
+                aiSummaryBtn.textContent = '✨ Get AI Summary';
+            });
+
+        });
+    </script>
+
+</body>
+</html>

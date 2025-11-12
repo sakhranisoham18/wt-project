@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3, h4 {
+            color: #ffffff;
+        }
+        
+        a {
+            color: #58a6ff;
+        }
+
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+            width: 100%; /* Make buttons full width in forms */
+            box-sizing: border-box; /* Include padding in width */
+        }
+        
+        .btn-inline {
+            width: auto; /* Override for non-form buttons */
+        }
+
+        .btn-primary {
+            background-color: #238636;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2ea043;
+        }
+        
+        .btn-secondary {
+            background-color: #30363d;
+            color: #c9d1d9;
+            border: 1px solid #8b949e;
+        }
+        .btn-secondary:hover {
+            background-color: #484f58;
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: #58a6ff;
+            border: 1px solid #58a6ff;
+        }
+        .btn-outline:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            color: #58a6ff;
+            margin: 0;
+            cursor: pointer;
+        }
+        .page-header nav button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #c9d1d9;
+            margin-left: 15px;
+        }
+        .page-header nav button:hover {
+            color: #58a6ff;
+        }
+
+        /* NEW STYLES for forms */
+        .auth-card {
+            max-width: 400px;
+            margin: 40px auto;
+        }
+        .auth-card h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 5px;
+            color: #c9d1d9;
+            box-sizing: border-box; /* Important */
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .error-message {
+            color: #ff7b72; /* Reddish error color */
+            font-size: 14px;
+            margin-top: 5px;
+            min-height: 1em; /* Prevents layout shift */
+            display: block;
+        }
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .auth-switch button {
+            background: none;
+            border: none;
+            color: #58a6ff;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+        /* END NEW STYLES */
+
+        .home-welcome {
+            text-align: center;
+            padding: 40px 0;
+        }
+        .category-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .category-card {
+            flex-basis: 200px;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .category-card span {
+            font-size: 40px;
+        }
+        .category-card .btn {
+             width: 100%;
+        }
+
+        .quiz-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .quiz-card {
+            flex-basis: 250px;
+            flex-grow: 1;
+        }
+        .quiz-card p {
+            margin: 8px 0;
+            color: #c9d1d9;
+        }
+        .quiz-card .btn {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        #progress-bar-container {
+            width: 100%;
+            background-color: #30363d;
+            border-radius: 5px;
+            height: 15px;
+            margin-bottom: 20px;
+        }
+        
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #238636;
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .answer-option {
+            display: block;
+            padding: 15px;
+            border: 1px solid #30363d;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .answer-option:hover {
+            background-color: #21262d;
+        }
+        .answer-option input {
+            margin-right: 15px;
+        }
+        
+        #quiz-message {
+            color: red;
+            text-align: center;
+            height: 1.2em;
+        }
+        
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 15px;
+        }
+        .quiz-nav button {
+            width: 48%;
+        }
+        .quiz-nav button:disabled {
+            background-color: #30363d;
+            cursor: not-allowed;
+        }
+
+        .results-card {
+            text-align: center;
+        }
+        
+        #result-score {
+            font-size: 60px;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+        
+        #result-percent {
+            font-size: 24px;
+            color: #c9d1d9;
+            margin-bottom: 25px;
+        }
+        
+        .summary-box {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 5px;
+            padding: 20px;
+            max-width: 300px;
+            margin: 20px auto;
+            text-align: left;
+        }
+        .summary-box li {
+            list-style-type: none;
+            margin-bottom: 10px;
+        }
+        .results-actions {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .results-actions .btn {
+            width: auto;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            border: 1px solid #30363d;
+            padding: 12px;
+            text-align: left;
+        }
+        .leaderboard-table thead {
+            background-color: #21262d;
+        }
+
+        @media (max-width: 600px) {
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .category-card, .quiz-card {
+                flex-basis: 100%;
+            }
+            .results-actions {
+                flex-direction: column;
+            }
+            .results-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main id="app">
+
+        <section id="page-login" class="page active">
+            <div class="card auth-card">
+                <h2>Login to QuizHub</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" class="form-control" required>
+                        <span id="login-email-error" class="error-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" class="form-control" required>
+                        <span id="login-password-error" class="error-message"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <div class="auth-switch">
+                    <p>Don't have an account? <button data-target="page-signup">Sign Up</button></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-signup" class="page">
+            <div class="card auth-card">
+                <h2>Create Account</h2>
+                <form id="signup-form" novalidate>
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" class="form-control">
+                        <span id="signup-name-error" class="error-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" class="form-control">
+                        <span id="signup-email-error" class="error-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-phone">Phone Number</label>
+                        <input type="tel" id="signup-phone" class="form-control">
+                        <span id="signup-phone-error" class="error-message"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" class="form-control">
+                        <span id="signup-password-error" class="error-message"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign Up</button>
+                </form>
+                <div class="auth-switch">
+                    <p>Already have an account? <button data-target="page-login">Login</button></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-home" class="page">
+            <header class="page-header">
+                <h1>QuizHub</h1>
+                <nav>
+                    <button>Profile</button>
+                    <button data-target="page-login">Logout</button>
+                </nav>
+            </header>
+
+            <div class="home-welcome">
+                <h2>Welcome to QuizHub!</h2>
+                <p>Test your knowledge with fun and interactive quizzes.</p>
+                <div>
+                    <button class="btn btn-primary btn-inline" data-target="page-quiz-select">Start Quiz</button>
+                    <button class="btn btn-secondary btn-inline" data-target="page-leaderboard" style="margin-left: 10px;">View Leaderboard</button>
+                </div>
+            </div>
+
+            <div>
+                <h3>Featured Categories</h3>
+                <div class="category-grid">
+                    <div class="card category-card">
+                        <span>🧬</span>
+                        <h4>Science</h4>
+                        <button class="btn btn-outline" data-target="page-quiz-select">Start Quiz</button>
+                    </div>
+                    <div class="card category-card">
+                        <span>⚽</span>
+                        <h4>Sports</h4>
+                        <button class="btn btn-outline" data-target="page-quiz-select">Start Quiz</button>
+                    </div>
+                    <div class="card category-card">
+                        <span>🧠</span>
+                        <h4>General Knowledge</h4>
+                        <button class="btn btn-outline" data-target="page-quiz-select">Start Quiz</button>
+                    </div>
+                    <div class="card category-card">
+                        <span>💻</span>
+                        <h4>Technology</h4>
+                        <button class="btn btn-outline" data-target="page-quiz-select">Start Quiz</button>
+                    </div>
+                </div>
+            </div>
+
+            <footer style="text-align: center; margin-top: 40px; color: #8b949e;">
+                <p>© 2025 QuizHub | <a href="#">About</a> | <a href="#">Contact</a></p>
+            </footer>
+        </section>
+
+        <section id="page-quiz-select" class="page">
+            <header class="page-header">
+                <h1 data-target="page-home">QuizHub</h1>
+                <nav>
+                    <button data-target="page-home">Home</button>
+                    <button data-target="page-leaderboard">Leaderboard</button>
+                    <button data-target="page-login">Logout</button>
+                </nav>
+            </header>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2>Choose a Quiz</h2>
+                <p>Select from a variety of categories.</p>
+            </div>
+
+            <div class="quiz-grid">
+                <div class="card quiz-card">
+                    <h3>World Geography Challenge</h3>
+                    <p><strong>Category:</strong> General Knowledge</p>
+                    <p><strong>Questions:</strong> 10</p>
+                    <p><strong>Difficulty:</strong> Medium</p>
+                    <button class="btn btn-primary" data-target="page-quiz-active">Start Quiz</button>
+                </div>
+                <div class="card quiz-card">
+                    <h3>Modern Physics 101</h3>
+                    <p><strong>Category:</strong> Science</p>
+                    <p><strong>Questions:</strong> 15</p>
+                    <p><strong>Difficulty:</strong> Hard</p>
+                    <button class="btn btn-primary" data-target="page-quiz-active">Start Quiz</button>
+                </div>
+                <div class="card quiz-card">
+                    <h3>World Cup Trivia</h3>
+                    <p><strong>Category:</strong> Sports</p>
+                    <p><strong>Questions:</strong> 10</p>
+                    <p><strong>Difficulty:</strong> Easy</p>
+                    <button class="btn btn-primary" data-target="page-quiz-active">Start Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-quiz-active" class="page">
+            <div class="card" style="max-width: 700px; margin: auto;">
+                <div class="quiz-header">
+                    <h2>General Knowledge Quiz</h2>
+                    <span>Question <span id="question-number">1</span> of 10</span>
+                    <button class="btn btn-outline btn-inline" data-target="page-quiz-select" style="padding: 5px 10px; font-size: 14px;">Exit Quiz</button>
+                </div>
+
+                <div id="progress-bar-container">
+                    <div id="progress-bar"></div>
+                </div>
+
+                <div>
+                    <h3 id="question-text" style="font-size: 20px; margin-bottom: 20px;">Q1. What is the capital city of Australia?</h3>
+                    
+                    <p id="quiz-message"></p>
+
+                    <div id="answer-options">
+                    </div>
+                </div>
+
+                <div class="quiz-nav">
+                    <button id="prev-btn" class="btn btn-secondary">← Previous</button>
+                    <button id="next-btn" class="btn btn-primary">Next →</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-results" class="page">
+            <header class="page-header">
+                <h1 data-target="page-home">QuizHub</h1>
+                <nav>
+                    <button data-target="page-home">Home</button>
+                    <button data-target="page-leaderboard">Leaderboard</button>
+                    <button data-target="page-login">Logout</button>
+                </nav>
+            </header>
+
+            <div class="card results-card">
+                <h2>🎉 Quiz Completed!</h2>
+                <p>You finished the General Knowledge Quiz.</p>
+
+                <div>
+                    <span id="result-score">8/10</span>
+                    <p id="result-percent">80% - Great job!</p>
+                </div>
+                
+                <div class="summary-box">
+                    <h4 style="margin-top: 0;">Performance Summary</h4>
+                    <ul>
+                        <li><strong>Time Taken:</strong> <span id="result-time">08:35</span></li>
+                        <li><strong>Correct Answers:</strong> <span id="result-correct">8</span></li>
+                        <li><strong>Incorrect Answers:</strong> <span id="result-incorrect">2</span></li>
+                    </ul>
+                </div>
+
+                <div class="results-actions">
+                    <button class="btn btn-outline" data-target="page-quiz-active">Retake Quiz</button>
+                    <button class="btn btn-primary" data-target="page-quiz-select">Try Another Quiz</button>
+                    <button class="btn btn-secondary" data-target="page-leaderboard">View Leaderboard</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-leaderboard" class="page">
+            <header class="page-header">
+                <h1 data-target="page-home">QuizHub</h1>
+                <nav>
+                    <button data-target="page-home">Home</button>
+                    <button data-target="page-login">Logout</button>
+                </nav>
+            </header>
+
+            <div class="card">
+                <h2 style="text-align: center;">Top Scorers - General Knowledge</h2>
+
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1.</td>
+                            <td>PlayerOne</td>
+                            <td>1500</td>
+                        </tr>
+                        <tr style="background-color: #21262d;">
+                            <td>2.</td>
+                            <td>QuizMaster</td>
+                            <td>1420</td>
+                        </tr>
+                        <tr>
+                            <td>3.</td>
+                            <td>SmartyPants</td>
+                            <td>1380</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="summary-box" style="text-align: center; margin-top: 20px;">
+                    <strong>Your Rank: #2</strong>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary btn-inline" data-target="page-home">Back to Home</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+
+    <script>
+        const quizData = [
+            {
+                question: "Q1. What is the capital city of Australia?",
+                options: ["Sydney", "Canberra", "Melbourne", "Perth"],
+                answer: "Canberra"
+            },
+            {
+                question: "Q2. What is the largest planet in our solar system?",
+                options: ["Earth", "Mars", "Jupiter", "Saturn"],
+                answer: "Jupiter"
+            },
+            {
+                question: "Q3. Who wrote 'Romeo and Juliet'?",
+                options: ["Charles Dickens", "William Shakespeare", "Jane Austen", "Mark Twain"],
+                answer: "William Shakespeare"
+            },
+            {
+                question: "Q4. What is the chemical symbol for Gold?",
+                options: ["Go", "Ag", "Au", "Gd"],
+                answer: "Au"
+            },
+            {
+                question: "Q5. How many continents are there?",
+                options: ["5", "6", "7", "8"],
+                answer: "7"
+            },
+            {
+                question: "Q6. Which country is known as the Land of the Rising Sun?",
+                options: ["China", "Japan", "South Korea", "Thailand"],
+                answer: "Japan"
+            },
+            {
+                question: "Q7. What is the hardest natural substance on Earth?",
+                options: ["Gold", "Iron", "Diamond", "Platinum"],
+                answer: "Diamond"
+            },
+            {
+                question: "Q8. In what year did the Titanic sink?",
+                options: ["1912", "1905", "1920", "1898"],
+                answer: "1912"
+            },
+            {
+                question: "Q9. What is the main ingredient in guacamole?",
+                options: ["Tomato", "Onion", "Avocado", "Lime"],
+                answer: "Avocado"
+            },
+            {
+                question: "Q10. What is the square root of 144?",
+                options: ["10", "11", "12", "14"],
+                answer: "12"
+            }
+        ];
+        
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        let quizStartTime;
+
+        let app, prevBtn, nextBtn, quizMessage;
+
+        // ===== NEW: Form and Validation Logic =====
+        
+        /**
+         * Clears all error messages on a form
+         * @param {HTMLElement} form - The form element
+         */
+        function clearErrors(form) {
+            form.querySelectorAll('.error-message').forEach(span => {
+                span.textContent = '';
+            });
+        }
+
+        /**
+         * Validates the Sign Up form based on the 5 rules from the image
+         * @returns {boolean} - True if valid, false otherwise
+         */
+        function validateSignUp() {
+            let isValid = true;
+            const form = document.getElementById('signup-form');
+            clearErrors(form);
+
+            // Get values
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const phone = document.getElementById('signup-phone').value.trim();
+            const password = document.getElementById('signup-password').value.trim();
+
+            // Get error spans
+            const nameError = document.getElementById('signup-name-error');
+            const emailError = document.getElementById('signup-email-error');
+            const phoneError = document.getElementById('signup-phone-error');
+            const passwordError = document.getElementById('signup-password-error');
+
+            // Regex patterns
+            // Fig 1.3 JS Validation: Email Pattern
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+            // Fig 1.5 JS Validation: Phone number pattern (exactly 10 digits)
+            const phonePattern = /^\d{10}$/; 
+            // Fig 1.4 JS Validation: Password Pattern (at least one uppercase, one lowercase, one number, one special character)
+            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$/;
+
+            // --- Fig 1.1 JS Validation: All fields are required ---
+            // This is the first rule.
+            if (name === '') {
+                nameError.textContent = 'Full Name is required.';
+                isValid = false;
+            }
+            if (email === '') {
+                emailError.textContent = 'Email is required.';
+                isValid = false;
+            }
+            if (phone === '') {
+                phoneError.textContent = 'Phone Number is required.';
+                isValid = false;
+            }
+            if (password === '') {
+                passwordError.textContent = 'Password is required.';
+                isValid = false;
+            }
+
+            // --- Fig 1.3 JS Validation: Email Pattern ---
+            // Only check the pattern if the field is not empty (to avoid redundant errors)
+            if (email !== '' && !emailPattern.test(email)) {
+                emailError.textContent = 'Please enter a valid email address (e.g., user@example.com).';
+                isValid = false;
+            }
+
+            // --- Fig 1.5 JS Validation: Phone number pattern ---
+            // Only check the pattern if the field is not empty
+            if (phone !== '' && !phonePattern.test(phone)) {
+                phoneError.textContent = 'Phone number must be exactly 10 digits.';
+                isValid = false;
+            }
+            
+            // --- Password validations (Fig 1.2 and Fig 1.4) ---
+            if (password !== '') {
+                let passwordErrorMessage = '';
+
+                // --- Fig 1.2 JS Validation: Password Length ---
+                if (password.length < 8) {
+                    passwordErrorMessage = 'Password must be at least 8 characters long. ';
+                    isValid = false;
+                } 
+
+                // --- Fig 1.4 JS Validation: Password Pattern ---
+                if (!passwordPattern.test(password)) {
+                    // Append this error message to the length one if it exists
+                    passwordErrorMessage += 'Must contain uppercase, lowercase, number, and special character.';
+                    isValid = false;
+                }
+
+                if (passwordErrorMessage !== '') {
+                    passwordError.textContent = passwordErrorMessage.trim();
+                }
+            }
+
+            return isValid;
+        }
+
+        /**
+         * Validates the Login form (simpler validation)
+         * @returns {boolean} - True if valid, false otherwise
+         */
+        function validateLogin() {
+            let isValid = true;
+            const form = document.getElementById('login-form');
+            clearErrors(form);
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const emailError = document.getElementById('login-email-error');
+            const passwordError = document.getElementById('login-password-error');
+
+            if (email === '') {
+                emailError.textContent = 'Email is required.';
+                isValid = false;
+            }
+            if (password === '') {
+                passwordError.textContent = 'Password is required.';
+                isValid = false;
+            }
+            
+            // For this project, we assume any non-empty fields are a "successful"
+            // login to proceed to the app. A real app would check credentials.
+
+            return isValid;
+        }
+
+
+        // ===== END NEW: Form and Validation Logic =====
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            app = document.getElementById('app');
+            prevBtn = document.getElementById('prev-btn');
+            nextBtn = document.getElementById('next-btn');
+            quizMessage = document.getElementById('quiz-message');
+
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+
+            app.addEventListener('click', (e) => {
+                let targetButton = e.target.closest('[data-target]');
+                if (targetButton) {
+                    const targetPageId = targetButton.getAttribute('data-target');
+                    
+                    if (targetPageId === 'page-quiz-active') {
+                        startQuiz();
+                    }
+                    
+                    if (targetPageId === 'page-login') {
+                        // When logging out or going to login, clear both forms
+                        loginForm.reset();
+                        signupForm.reset();
+                        clearErrors(loginForm);
+                        clearErrors(signupForm);
+                    }
+                     if (targetPageId === 'page-signup') {
+                        // When going to signup, clear both forms
+                        loginForm.reset();
+                        signupForm.reset();
+                        clearErrors(loginForm);
+                        clearErrors(signupForm);
+                    }
+                    
+                    showPage(targetPageId);
+                }
+            });
+
+            if(loginForm) {
+                loginForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); 
+                    if (validateLogin()) {
+                        showPage('page-home');
+                    }
+                });
+            }
+
+            if(signupForm) {
+                signupForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); 
+                    if (validateSignUp()) {
+                        alert("Sign Up Successful! You can now log in.");
+                        showPage('page-login'); 
+                        // Pre-fill login email with signup email
+                        document.getElementById('login-email').value = document.getElementById('signup-email').value;
+                        signupForm.reset(); // Clear signup form
+                    }
+                });
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    saveAnswer();
+                    if (currentQuestionIndex > 0) {
+                        currentQuestionIndex--;
+                        loadQuestion();
+                    }
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    const selectedOption = document.querySelector('input[name="answer"]:checked');
+                    if (!selectedOption) {
+                        quizMessage.textContent = 'Please select an answer before proceeding.';
+                        return;
+                    }
+                    quizMessage.textContent = '';
+                    saveAnswer();
+
+                    if (currentQuestionIndex < quizData.length - 1) {
+                        currentQuestionIndex++;
+                        loadQuestion();
+                    } else {
+                        submitQuiz();
+                    }
+                });
+            }
+        });
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+        }
+        
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = new Array(quizData.length).fill(null);
+            quizStartTime = new Date();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const questionData = quizData[currentQuestionIndex];
+            const totalQuestions = quizData.length;
+            
+            document.getElementById('question-number').textContent = currentQuestionIndex + 1;
+            document.getElementById('question-text').textContent = questionData.question;
+            
+            const progressPercent = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            const optionsContainer = document.getElementById('answer-options');
+            optionsContainer.innerHTML = '';
+            
+            questionData.options.forEach(option => {
+                const label = document.createElement('label');
+                label.className = 'answer-option';
+                
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'answer';
+                input.value = option;
+                if (userAnswers[currentQuestionIndex] === option) {
+                    input.checked = true;
+                }
+                
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(option));
+                optionsContainer.appendChild(label);
+            });
+
+            quizMessage.textContent = '';
+            prevBtn.disabled = (currentQuestionIndex === 0);
+            nextBtn.textContent = (currentQuestionIndex === quizData.length - 1) ? 'Submit Quiz' : 'Next →';
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = selectedOption.value;
+            }
+        }
+
+        function calculateResults() {
+            let score = 0;
+            for (let i = 0; i < userAnswers.length; i++) {
+                if (userAnswers[i] === quizData[i].answer) {
+                    score++;
+                }
+            }
+            return score;
+        }
+
+        function submitQuiz() {
+            const score = calculateResults();
+            const total = quizData.length;
+            const percent = Math.round((score / total) * 100);
+            const quizEndTime = new Date();
+            const timeTaken = Math.round((quizEndTime - quizStartTime) / 1000);
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            const timeString = `${minutes}m ${seconds}s`;
+
+            document.getElementById('result-score').textContent = `${score}/${total}`;
+            document.getElementById('result-percent').textContent = `${percent}% - ${percent > 70 ? 'Great job!' : 'Good try!'}`;
+            document.getElementById('result-time').textContent = timeString;
+            document.getElementById('result-correct').textContent = score;
+            document.getElementById('result-incorrect').textContent = total - score;
+            
+            showPage('page-results');
+        }
+    </script>
+</body>
+</html>

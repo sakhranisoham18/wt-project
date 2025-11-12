@@ -1,0 +1,18 @@
+Project Title: QuizHub: A Web-Based Interactive Quiz Platform
+
+Submitted by:
+Soham Sakhrani
+Enrollment No.: 92400103370
+Class: EC3
+
+Abstract
+
+This project presents the design and development of "QuizHub," a dynamic and interactive web-based quiz application. The primary objective of this platform is to provide a seamless and efficient solution for creating, managing, and taking online quizzes, suitable for educational, training, or recreational purposes.
+
+The system is architecturally segregated into two primary modules: the Client Side (User Portal) and the Admin Side (Management Panel), ensuring a clear separation of functionalities.
+
+The Client Side is the user-facing interface where participants can register, log in, browse a catalog of available quizzes, and participate in quiz sessions. Upon completion, users receive immediate automated scoring and feedback on their performance, creating an engaging and responsive learning environment.
+
+The Admin Side is a secure, authenticated-access panel designed for administrators or content creators. This module provides comprehensive CRUD (Create, Read, Update, Delete) capabilities for quiz management. Key features include the ability to construct new quizzes, add, edit, or remove questions, define multiple-choice options, and designate correct answers. Furthermore, the admin panel allows for the monitoring of user results and overall quiz analytics.
+
+QuizHub aims to deliver a robust, scalable, and user-friendly solution that simplifies the process of online assessment for both quiz administrators and end-users.
